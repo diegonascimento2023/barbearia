@@ -1,13 +1,14 @@
 package com.barbearia;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
+import com.barbearia.database.DatabaseConnection;
+
+public class App {
+    public static void main(String[] args) {
+        try {
+            DatabaseConnection.inicializarBancoDeDados();
+            System.out.println("Banco de dados iniciado com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
     }
 }
