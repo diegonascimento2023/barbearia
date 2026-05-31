@@ -1,14 +1,15 @@
 package com.barbearia;
 
 import com.barbearia.database.DatabaseConnection;
+import com.barbearia.view.MenuView;
 
 public class App {
     public static void main(String[] args) {
         try {
             DatabaseConnection.inicializarBancoDeDados();
-            System.out.println("Banco de dados iniciado com sucesso!");
+            new MenuView().iniciar();
         } catch (Exception e) {
-            System.out.println("Erro: " + e.getMessage());
+            System.out.println("Erro ao iniciar o sistema: " + e.getMessage());
         }
     }
 }
