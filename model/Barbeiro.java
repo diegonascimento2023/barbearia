@@ -19,7 +19,7 @@ public class Barbeiro {
         this.senha = senha; 
         this.horarioInicio = horarioInicio; 
         this.horarioFim = horarioFim; 
-        this.ativo = true;
+        this.ativo = ativo;
     }
 
     public Long getId(){return id;}
@@ -40,6 +40,6 @@ public class Barbeiro {
     public LocalTime getHorarioFim(){return horarioFim;}
     public void setHorarioFim(LocalTime horarioFim){this.horarioFim = horarioFim;}
 
-    public boolean getAtivo(){return ativo;}
+    public boolean isAtivo(){return ativo;}
     public void setAtivo(boolean ativo){this.ativo = ativo;}
 }

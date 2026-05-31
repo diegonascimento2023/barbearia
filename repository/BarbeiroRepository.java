@@ -29,7 +29,7 @@ public class BarbeiroRepository {
             b.setSenha(barbeiroAtualizado.getSenha());
             b.setHorarioInicio(barbeiroAtualizado.getHorarioInicio());
             b.setHorarioFim(barbeiroAtualizado.getHorarioFim());
-            b.setAtivo(barbeiroAtualizado.getAtivo());
+            b.setAtivo(barbeiroAtualizado.isAtivo());
         }   
     }
 
@@ -42,5 +42,14 @@ public class BarbeiroRepository {
 
     public List<Barbeiro> listarTodos(){
         return new ArrayList<>(fonteDados);
+    }
+
+    public Barbeiro buscarPorLogin(String login){
+        for(Barbeiro b : fonteDados){
+            if(b.getLogin().equals(login) && b.isAtivo()){
+                return b;
+            }
+        }
+        return null;
     }
 }
