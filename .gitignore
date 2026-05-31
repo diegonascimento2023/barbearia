@@ -25,3 +25,9 @@ replay_pid*
 
 # Demo Java Files
 Demo.java
+
+# SQLite database
+*.db
+
+# Maven target folder
+target/
