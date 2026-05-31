@@ -13,7 +13,7 @@ public class Barbearia {
         this.nomeEstabelecimento = nomeEstabelecimento; 
         this.barbeiros = new ArrayList<>();
         this.servicos = new ArrayList<>();
-        this.agendamentos = new ArrayList();
+        this.agendamentos = new ArrayList<>();
     }
 
     public String getNomeEstabelecimento(){return nomeEstabelecimento;}
