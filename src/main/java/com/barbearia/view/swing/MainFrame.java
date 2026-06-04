@@ -40,6 +40,7 @@ public class MainFrame extends JFrame {
 
     private JComponent criarAbas() {
         JTabbedPane tabs = new JTabbedPane();
+        tabs.addTab("Barbeiros", new BarbeiroPanel());
         tabs.addTab("Serviços", new ServicoPanel());
         return tabs;
     }
