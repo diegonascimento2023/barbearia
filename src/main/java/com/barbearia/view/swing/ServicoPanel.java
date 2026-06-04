@@ -1,5 +1,8 @@
 package com.barbearia.view.swing;
 
+import com.barbearia.controller.ServicoController;
+import com.barbearia.model.Servico;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -14,9 +17,14 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.sql.SQLException;
+import java.util.List;
 
 public class ServicoPanel extends JPanel {
 
+    private final ServicoController servicoController = new ServicoController();
+    private final DefaultTableModel tableModel;
+    private JTable table;
     private final JTextField nameField = new JTextField(18);
     private final JTextArea descriptionArea = new JTextArea(4, 18);
     private final JTextField priceField = new JTextField(18);
@@ -24,9 +32,11 @@ public class ServicoPanel extends JPanel {
 
     public ServicoPanel() {
         super(new BorderLayout(16, 16));
+        tableModel = criarModeloTabela();
         setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         add(criarFormulario(), BorderLayout.WEST);
         add(criarTabela(), BorderLayout.CENTER);
+        carregarServicos();
     }
 
     private JPanel criarFormulario() {
@@ -43,10 +53,18 @@ public class ServicoPanel extends JPanel {
     }
 
     private JScrollPane criarTabela() {
-        String[] columns = {"ID", "Nome", "Preço", "Duração"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        JTable table = new JTable(model);
+        table = new JTable(tableModel);
+        table.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                preencherFormularioSelecionado();
+            }
+        });
         return new JScrollPane(table);
+    }
+
+    private DefaultTableModel criarModeloTabela() {
+        String[] columns = {"ID", "Nome", "Preço", "Duração"};
+        return new DefaultTableModel(columns, 0);
     }
 
     private void adicionarCampo(JPanel form, int row, String label, JTextField field) {
@@ -71,9 +89,17 @@ public class ServicoPanel extends JPanel {
 
     private void adicionarBotoes(JPanel form, int row) {
         JPanel buttons = new JPanel();
-        buttons.add(criarBotaoPendente("Cadastrar"));
-        buttons.add(criarBotaoPendente("Atualizar"));
-        buttons.add(criarBotaoPendente("Remover"));
+        JButton createButton = new JButton("Cadastrar");
+        createButton.addActionListener(event -> cadastrarServico());
+        buttons.add(createButton);
+
+        JButton updateButton = new JButton("Atualizar");
+        updateButton.addActionListener(event -> atualizarServico());
+        buttons.add(updateButton);
+
+        JButton removeButton = new JButton("Remover");
+        removeButton.addActionListener(event -> removerServico());
+        buttons.add(removeButton);
 
         JButton clearButton = new JButton("Limpar");
         clearButton.addActionListener(event -> limparCampos());
@@ -82,12 +108,6 @@ public class ServicoPanel extends JPanel {
         GridBagConstraints constraints = criarRestricoes(0, row);
         constraints.gridwidth = 2;
         form.add(buttons, constraints);
-    }
-
-    private JButton criarBotaoPendente(String text) {
-        JButton button = new JButton(text);
-        button.addActionListener(event -> mostrarAcaoPendente());
-        return button;
     }
 
     private GridBagConstraints criarRestricoes(int column, int row) {
@@ -103,14 +123,122 @@ public class ServicoPanel extends JPanel {
         descriptionArea.setText("");
         priceField.setText("");
         durationField.setText("");
+        table.clearSelection();
     }
 
-    private void mostrarAcaoPendente() {
-        JOptionPane.showMessageDialog(
-            this,
-            "A integração desta ação será feita na próxima etapa.",
-            "Em desenvolvimento",
-            JOptionPane.INFORMATION_MESSAGE
+    private void carregarServicos() {
+        try {
+            List<Servico> servicos = servicoController.listarTodos();
+            tableModel.setRowCount(0);
+
+            for (Servico servico : servicos) {
+                tableModel.addRow(new Object[] {
+                    servico.getId(),
+                    servico.getNome(),
+                    servico.getPreco(),
+                    servico.getDuracaoEmMinutos()
+                });
+            }
+        } catch (SQLException error) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Erro ao carregar serviços: " + error.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void cadastrarServico() {
+        try {
+            Servico servico = lerServicoDoFormulario();
+            servicoController.criar(servico);
+            limparCampos();
+            carregarServicos();
+            mostrarMensagem("Serviço cadastrado com sucesso.");
+        } catch (IllegalArgumentException | SQLException error) {
+            mostrarErro(error.getMessage());
+        }
+    }
+
+    private void atualizarServico() {
+        try {
+            Long id = lerIdSelecionado();
+            Servico servico = lerServicoDoFormulario();
+            servicoController.atualizar(id, servico);
+            limparCampos();
+            carregarServicos();
+            mostrarMensagem("Serviço atualizado com sucesso.");
+        } catch (IllegalArgumentException | SQLException error) {
+            mostrarErro(error.getMessage());
+        }
+    }
+
+    private void removerServico() {
+        try {
+            Long id = lerIdSelecionado();
+            servicoController.remover(id);
+            limparCampos();
+            carregarServicos();
+            mostrarMensagem("Serviço removido com sucesso.");
+        } catch (IllegalArgumentException | SQLException error) {
+            mostrarErro(error.getMessage());
+        }
+    }
+
+    private Servico lerServicoDoFormulario() {
+        String nome = nameField.getText().trim();
+        String descricao = descriptionArea.getText().trim();
+        String precoTexto = priceField.getText().trim().replace(",", ".");
+        String duracaoTexto = durationField.getText().trim();
+
+        if (nome.isBlank() || descricao.isBlank() || precoTexto.isBlank() || duracaoTexto.isBlank()) {
+            throw new IllegalArgumentException("Preencha todos os campos.");
+        }
+
+        return new Servico(
+            0L,
+            nome,
+            descricao,
+            new java.math.BigDecimal(precoTexto),
+            Integer.parseInt(duracaoTexto)
         );
+    }
+
+    private Long lerIdSelecionado() {
+        int row = table.getSelectedRow();
+
+        if (row < 0) {
+            throw new IllegalArgumentException("Selecione um serviço na tabela.");
+        }
+
+        return Long.valueOf(table.getValueAt(row, 0).toString());
+    }
+
+    private void preencherFormularioSelecionado() {
+        int row = table.getSelectedRow();
+
+        if (row < 0) {
+            return;
+        }
+
+        try {
+            Long id = Long.valueOf(table.getValueAt(row, 0).toString());
+            Servico servico = servicoController.buscarPorId(id);
+            nameField.setText(servico.getNome());
+            descriptionArea.setText(servico.getDescricao());
+            priceField.setText(servico.getPreco().toString());
+            durationField.setText(String.valueOf(servico.getDuracaoEmMinutos()));
+        } catch (IllegalArgumentException | SQLException error) {
+            mostrarErro(error.getMessage());
+        }
+    }
+
+    private void mostrarMensagem(String mensagem) {
+        JOptionPane.showMessageDialog(this, mensagem);
+    }
+
+    private void mostrarErro(String mensagem) {
+        JOptionPane.showMessageDialog(this, mensagem, "Erro", JOptionPane.ERROR_MESSAGE);
     }
 }
