@@ -193,10 +193,26 @@ public class BarbeiroPanel extends JPanel {
             nome,
             login,
             senha,
-            LocalTime.parse(inicioTexto),
-            LocalTime.parse(fimTexto),
+            lerHorario(inicioTexto),
+            lerHorario(fimTexto),
             true
         );
+    }
+
+    private LocalTime lerHorario(String horarioTexto) {
+        if (horarioTexto.matches("\\d{1,2}")) {
+            int hora = Integer.parseInt(horarioTexto);
+            return LocalTime.of(hora, 0);
+        }
+
+        if (horarioTexto.matches("\\d{1,2}:\\d{2}")) {
+            String[] partes = horarioTexto.split(":");
+            int hora = Integer.parseInt(partes[0]);
+            int minuto = Integer.parseInt(partes[1]);
+            return LocalTime.of(hora, minuto);
+        }
+
+        return LocalTime.parse(horarioTexto);
     }
 
     private Long lerIdSelecionado() {
