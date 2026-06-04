@@ -1,5 +1,8 @@
 package com.barbearia.view.swing;
 
+import com.barbearia.controller.ServicoController;
+import com.barbearia.model.Servico;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -14,9 +17,13 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.sql.SQLException;
+import java.util.List;
 
 public class ServicoPanel extends JPanel {
 
+    private final ServicoController servicoController = new ServicoController();
+    private final DefaultTableModel tableModel;
     private final JTextField nameField = new JTextField(18);
     private final JTextArea descriptionArea = new JTextArea(4, 18);
     private final JTextField priceField = new JTextField(18);
@@ -24,9 +31,11 @@ public class ServicoPanel extends JPanel {
 
     public ServicoPanel() {
         super(new BorderLayout(16, 16));
+        tableModel = criarModeloTabela();
         setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         add(criarFormulario(), BorderLayout.WEST);
         add(criarTabela(), BorderLayout.CENTER);
+        carregarServicos();
     }
 
     private JPanel criarFormulario() {
@@ -43,10 +52,13 @@ public class ServicoPanel extends JPanel {
     }
 
     private JScrollPane criarTabela() {
-        String[] columns = {"ID", "Nome", "Preço", "Duração"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        JTable table = new JTable(model);
+        JTable table = new JTable(tableModel);
         return new JScrollPane(table);
+    }
+
+    private DefaultTableModel criarModeloTabela() {
+        String[] columns = {"ID", "Nome", "Preço", "Duração"};
+        return new DefaultTableModel(columns, 0);
     }
 
     private void adicionarCampo(JPanel form, int row, String label, JTextField field) {
@@ -112,5 +124,28 @@ public class ServicoPanel extends JPanel {
             "Em desenvolvimento",
             JOptionPane.INFORMATION_MESSAGE
         );
+    }
+
+    private void carregarServicos() {
+        try {
+            List<Servico> servicos = servicoController.listarTodos();
+            tableModel.setRowCount(0);
+
+            for (Servico servico : servicos) {
+                tableModel.addRow(new Object[] {
+                    servico.getId(),
+                    servico.getNome(),
+                    servico.getPreco(),
+                    servico.getDuracaoEmMinutos()
+                });
+            }
+        } catch (SQLException error) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Erro ao carregar serviços: " + error.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 }
