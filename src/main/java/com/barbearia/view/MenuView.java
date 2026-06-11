@@ -252,6 +252,11 @@ public class MenuView {
     }
 
     private void cadastrarAgendamento() throws SQLException {
+        System.out.println("\n--- Barbeiros Disponíveis ---");
+        listarBarbeiros();
+        System.out.println("\n--- Serviços Disponíveis ---");
+        listarServicos();
+        System.out.println("\nPreencha os dados do agendamento:");
         Agendamento agendamento = lerDadosAgendamento("pendente");
         agendamentoController.criar(agendamento);
         System.out.println("Agendamento cadastrado com sucesso.");
@@ -267,6 +272,8 @@ public class MenuView {
     }
 
     private void listarAgendamentosPorBarbeiro() throws SQLException {
+        System.out.println("\n--- Barbeiros Disponíveis ---");
+        listarBarbeiros();
         Long idBarbeiro = lerLong("ID do barbeiro: ");
         imprimirAgendamentos(agendamentoController.listarPorBarbeiro(idBarbeiro));
     }
@@ -274,6 +281,10 @@ public class MenuView {
     private void atualizarAgendamento() throws SQLException {
         Long id = lerLong("ID do agendamento: ");
         String status = lerTextoObrigatorio("Status: ");
+        System.out.println("\n--- Barbeiros Disponíveis ---");
+        listarBarbeiros();
+        System.out.println("\n--- Serviços Disponíveis ---");
+        listarServicos();
         Agendamento agendamento = lerDadosAgendamento(status);
         agendamentoController.atualizar(id, agendamento);
         System.out.println("Agendamento atualizado com sucesso.");
@@ -295,20 +306,26 @@ public class MenuView {
         return new Agendamento(0L, nomeCliente, contatoCliente, dataHora, status, idBarbeiro, idServico);
     }
 
-    private void imprimirAgendamentos(List<Agendamento> agendamentos) {
+    private void imprimirAgendamentos(List<Agendamento> agendamentos) throws SQLException {
         if (agendamentos.isEmpty()) {
             System.out.println("Nenhum agendamento encontrado.");
             return;
         }
 
         for (Agendamento agendamento : agendamentos) {
+            Barbeiro barbeiro = barbeiroController.buscarPorId(agendamento.getIdBarbeiro());
+            Servico servico = servicoController.buscarPorId(agendamento.getIdServico());
+            
+            String nomeBarbeiro = barbeiro != null ? barbeiro.getNome() : "Desconhecido";
+            String nomeServico = servico != null ? servico.getNome() : "Desconhecido";
+
             System.out.printf(
-                "#%d - %s | %s | barbeiro #%d | serviço #%d | status: %s%n",
+                "#%d - %s | %s | Barbeiro: %s | Serviço: %s | status: %s%n",
                 agendamento.getId(),
                 agendamento.getNomeCliente(),
                 formatarDataHora(agendamento.getDataHora()),
-                agendamento.getIdBarbeiro(),
-                agendamento.getIdServico(),
+                nomeBarbeiro,
+                nomeServico,
                 agendamento.getStatus()
             );
         }

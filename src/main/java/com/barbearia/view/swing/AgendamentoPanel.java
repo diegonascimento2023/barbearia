@@ -144,7 +144,7 @@ public class AgendamentoPanel extends JPanel {
         table.clearSelection();
     }
 
-    private void carregarOpcoes() {
+    public void carregarOpcoes() {
         try {
             barberCombo.removeAllItems();
             serviceCombo.removeAllItems();
@@ -164,7 +164,7 @@ public class AgendamentoPanel extends JPanel {
         }
     }
 
-    private void carregarAgendamentos() {
+    public void carregarAgendamentos() {
         try {
             List<Agendamento> agendamentos = agendamentoController.listarTodos();
             tableModel.setRowCount(0);

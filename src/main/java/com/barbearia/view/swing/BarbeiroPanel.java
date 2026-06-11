@@ -120,7 +120,7 @@ public class BarbeiroPanel extends JPanel {
         table.clearSelection();
     }
 
-    private void carregarBarbeiros() {
+    public void carregarBarbeiros() {
         try {
             List<Barbeiro> barbeiros = barbeiroController.listarTodos();
             tableModel.setRowCount(0);

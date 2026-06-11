@@ -6,6 +6,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
@@ -40,9 +42,30 @@ public class MainFrame extends JFrame {
 
     private JComponent criarAbas() {
         JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("Barbeiros", new BarbeiroPanel());
-        tabs.addTab("Serviços", new ServicoPanel());
-        tabs.addTab("Agendamentos", new AgendamentoPanel());
+        
+        BarbeiroPanel barbeiroPanel = new BarbeiroPanel();
+        ServicoPanel servicoPanel = new ServicoPanel();
+        AgendamentoPanel agendamentoPanel = new AgendamentoPanel();
+        
+        tabs.addTab("Barbeiros", barbeiroPanel);
+        tabs.addTab("Serviços", servicoPanel);
+        tabs.addTab("Agendamentos", agendamentoPanel);
+        
+        tabs.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int selectedIndex = tabs.getSelectedIndex();
+                if (selectedIndex == 0) {
+                    barbeiroPanel.carregarBarbeiros();
+                } else if (selectedIndex == 1) {
+                    servicoPanel.carregarServicos();
+                } else if (selectedIndex == 2) {
+                    agendamentoPanel.carregarOpcoes();
+                    agendamentoPanel.carregarAgendamentos();
+                }
+            }
+        });
+        
         return tabs;
     }
 }

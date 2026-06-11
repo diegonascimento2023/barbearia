@@ -126,7 +126,7 @@ public class ServicoPanel extends JPanel {
         table.clearSelection();
     }
 
-    private void carregarServicos() {
+    public void carregarServicos() {
         try {
             List<Servico> servicos = servicoController.listarTodos();
             tableModel.setRowCount(0);

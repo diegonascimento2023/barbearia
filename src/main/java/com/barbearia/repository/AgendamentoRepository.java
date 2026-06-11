@@ -81,9 +81,9 @@ public class AgendamentoRepository {
 
     public List<Agendamento> listarPorData(LocalDate data) throws SQLException {
         List<Agendamento> lista = new ArrayList<>();
-        String sql = "SELECT * FROM agendamento WHERE DATE(dataHora) = ?";
+        String sql = "SELECT * FROM agendamento WHERE dataHora LIKE ?";
         try (PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql)) {
-            stmt.setString(1, data.toString());
+            stmt.setString(1, data.toString() + "%");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) lista.add(mapear(rs));
         }
